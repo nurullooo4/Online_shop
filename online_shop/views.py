@@ -1,3 +1,4 @@
+from re import search
 from typing import Optional
 
 from django.contrib import messages
@@ -63,20 +64,6 @@ def product_detail(request, product_id):
     return render(request, 'online_shop/detail.html', context)
 
 
-# def add_comment(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-#     if request.method == 'POST':
-#         name = request.POST.get('name')
-#         email = request.POST.get('email')
-#         body = request.POST.get('body')
-#         comment = Comment(name=name, email=email, body=body)
-#         comment.product = product
-#         comment.save()
-#         return redirect('product_detail', product_id)
-#     else:
-#         pass
-#     return render(request, 'online_shop/detail.html')
-
 def add_comment(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == 'POST':
@@ -89,6 +76,9 @@ def add_comment(request, product_id):
 
     else:
         form = CommentModelForm()
+
+    if search:
+        product = product.filter(name__icontains=search) | Q(comments__name__icontains=search)
 
     context = {
         'form': form,
