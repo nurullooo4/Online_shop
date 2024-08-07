@@ -14,20 +14,20 @@ from django.db.models import Q
 # Create your views here.
 
 
-def product_list(request, category_id: Optional[int] = None):
+def product_list(request, category_slug: Optional[str] = None):
     categories = Category.objects.all().order_by('id')
     search = request.GET.get('q')
     filter_type = request.GET.get('filter', '')
-    if category_id:
+    if category_slug:
         if filter_type == 'expensive':
-            products = Product.objects.filter(category=category_id).order_by('-price')
+            products = Product.objects.filter(category__slug=category_slug).order_by('-price')
         elif filter_type == 'cheap':
-            products = Product.objects.filter(category=category_id).order_by('price')
+            products = Product.objects.filter(category__slug=category_slug).order_by('price')
         elif filter_type == 'rating':
-            products = Product.objects.filter(Q(category=category_id) & Q(rating__gte=4)).order_by('-rating')
+            products = Product.objects.filter(Q(category__slug=category_slug) & Q(rating__gte=4)).order_by('-rating')
 
         else:
-            products = Product.objects.filter(category=category_id)
+            products = Product.objects.filter(category__slug=category_slug)
 
     else:
         if filter_type == 'expensive':
@@ -54,16 +54,16 @@ def product_list(request, category_id: Optional[int] = None):
 def product_detail(request, product_id):
     categories = Category.objects.all()
     product = Product.objects.get(id=product_id)
-    search = request.GET.get('q')
+    min_price = product.price * 0.5
+    max_price = product.price * 1.5
+    similar_product = Product.object.filter(category=product.category, price__renge=[min_price,max_price]).exclude(id=product_id)
     comments = Comment.objects.filter(product=product_id, is_provide=True).order_by('-id')
-
-    if search:
-        product = product.filter(name__icontains=search) | Q(comments__name__icontains=search)
 
     context = {
         'product': product,
         'comments': comments,
-        'categories': categories
+        'categories': categories,
+        'similar_product': similar_product
     }
 
     return render(request, 'online_shop/detail.html', context)
