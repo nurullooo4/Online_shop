@@ -54,7 +54,12 @@ def product_list(request, category_id: Optional[int] = None):
 def product_detail(request, product_id):
     categories = Category.objects.all()
     product = Product.objects.get(id=product_id)
+    search = request.GET.get('q')
     comments = Comment.objects.filter(product=product_id, is_provide=True).order_by('-id')
+
+    if search:
+        product = product.filter(name__icontains=search) | Q(comments__name__icontains=search)
+
     context = {
         'product': product,
         'comments': comments,
@@ -76,9 +81,6 @@ def add_comment(request, product_id):
 
     else:
         form = CommentModelForm()
-
-    if search:
-        product = product.filter(name__icontains=search) | Q(comments__name__icontains=search)
 
     context = {
         'form': form,
@@ -156,3 +158,14 @@ def edit_product(request, product_id):
             return redirect('product_detail', product_id)
 
     return render(request, 'online_shop/edit-product.html', {'form': form})
+
+def detail(request, _id):
+    product = Product.objects.get(pk=_id)
+    related_products = Product.objects.filter(category=product.category).exclude(id=_id)
+
+    context = {
+        'product': product,
+        'related_products': related_products
+    }
+
+    return render(request, 'online_shop/detail.html', context)
