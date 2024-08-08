@@ -169,3 +169,4 @@ def detail(request, _id):
     }
 
     return render(request, 'online_shop/detail.html', context)
+

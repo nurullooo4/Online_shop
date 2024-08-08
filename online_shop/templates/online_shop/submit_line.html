@@ -1,0 +1,14 @@
+ {% extends "admin/submit_line.html" %}
+
+ {% block extra-actions %}
+
+ {%  For a simple link%}
+ <div class="form-group">
+    <a href="/some/url" class="btn btn-outline-info form-control">Some Action</a>
+</div>
+
+ {%  Or, to process this with form submission  %}
+ <div class="form-group">
+    <input type="submit" class="btn btn-outline-info form-control" value="SomeAction" name="_your_action">
+</div>
+ {% endblock %}
